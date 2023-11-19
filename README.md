@@ -1,23 +1,17 @@
-# Terraform modules
-
-This repo contains terraform modules with pre-configured settings
+# EC2 and Cloudfront Setup using Terraform
 
 <!-- vscode-markdown-toc -->
 
-- 1. [Prerequisites](#Prerequisites)
-  - 1.1. [AWS CLI Installation](#AWSCLIInstallation)
-  - 1.2. [Terraform Installation](#TerraformInstallation)
-    - 1.2.1. [Mac OS](#MacOS)
-    - 1.2.2. [Ubuntu](#Ubuntu)
-    - 1.2.3. [Windows](#Windows)
-    - 1.2.4. [Verify the installation](#Verifytheinstallation)
-- 2. [Modules](#Modules)
-  - 2.1. [Self-created modules](#Self-createdmodules)
-  - 2.2. [Existing module](#Existingmodule)
-- 3. [Terraform setup for EC2 Creation](#TerraformsetupforEC2Creation)
-  - 3.1. [Config settings](#Configsettings)
-  - 3.2. [Set entry script](#Setentryscript)
-  - 3.3. [Execution](#Execution)
+- 1. [AWS credential setup](#AWScredentialsetup)
+- 2. [Terraform Installation](#TerraformInstallation)
+  - 2.1. [Mac OS](#MacOS)
+  - 2.2. [Ubuntu](#Ubuntu)
+  - 2.3. [Verify the installation](#Verifytheinstallation)
+- 3. [How to create EC2 instance and associate it with Cloudfront using Terraform?](#HowtocreateEC2instanceandassociateitwithCloudfrontusingTerraform)
+  - 3.1. [Clone this repo to your local machine](#Clonethisrepotoyourlocalmachine)
+  - 3.2. [Config settings](#Configsettings)
+  - 3.3. [Set entry script](#Setentryscript)
+  - 3.4. [Execution](#Execution)
 
 <!-- vscode-markdown-toc-config
 	numbering=true
@@ -25,16 +19,14 @@ This repo contains terraform modules with pre-configured settings
 	/vscode-markdown-toc-config -->
 <!-- /vscode-markdown-toc -->
 
-## 1. <a name='Prerequisites'></a>Prerequisites
-
-### 1.1. <a name='AWSCLIInstallation'></a>AWS CLI Installation
+## 1. <a name='AWScredentialsetup'></a>AWS credential setup
 
 - Make sure you have installed AWS CLI. If not, run `pip install awscli` in your terminal
 - Run `aws configure` and input your AWS `access_key_id`, `secret_access_key` and `region` accordingly
 
-### 1.2. <a name='TerraformInstallation'></a>Terraform Installation
+## 2. <a name='TerraformInstallation'></a>Terraform Installation
 
-#### 1.2.1. <a name='MacOS'></a>Mac OS
+### 2.1. <a name='MacOS'></a>Mac OS
 
 You need to have Homebrew installed
 
@@ -43,12 +35,12 @@ brew tap hashicorp/tap
 brew install hashicorp/tap/terraform
 ```
 
-#### 1.2.2. <a name='Ubuntu'></a>Ubuntu
+### 2.2. <a name='Ubuntu'></a>Ubuntu
 
 ```bash
 sudo apt-get update && sudo apt-get install -y gnupg software-properties-common
 
-wget -o- https://apt.releases.hashicorp.com/gpg | \
+wget -O- https://apt.releases.hashicorp.com/gpg | \
 gpg --dearmor | \
 sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
 
@@ -65,53 +57,57 @@ sudo apt update
 sudo apt-get install terraform
 ```
 
-#### 1.2.3. <a name='Windows'></a>Windows
-
-Download binary from [https://developer.hashicorp.com/terraform/downloads](https://developer.hashicorp.com/terraform/downloads)
-
-#### 1.2.4. <a name='Verifytheinstallation'></a>Verify the installation
+### 2.3. <a name='Verifytheinstallation'></a>Verify the installation
 
 ```bash
 terraform -help
 ```
 
-## 2. <a name='Modules'></a>Modules
+## 3. <a name='HowtocreateEC2instanceandassociateitwithCloudfrontusingTerraform'></a>How to create EC2 instance and associate it with Cloudfront using Terraform?
 
-So far we have 1 self-created modules, 1 existing modules being used.
+### 3.1. <a name='Clonethisrepotoyourlocalmachine'></a>Clone this repo to your local machine
 
-### 2.1. <a name='Self-createdmodules'></a>Self-created modules
+```bash
+git clone git@gitlab.com:asiabots/nick/terraform-ec2-cloudfront-template.git
+```
 
-- [AWS EC2](docs/ec2.md)
-
-### 2.2. <a name='Existingmodule'></a>Existing module
-
-- [AWS VPC](docs/vpc.md)
-
-## 3. <a name='TerraformsetupforEC2Creation'></a>Terraform setup for EC2 Creation
-
-### 3.1. <a name='Configsettings'></a>Config settings
+### 3.2. <a name='Configsettings'></a>Config settings
 
 In `terraform.tfvars`, set the following variables.
 
-| Name       | Description                                             | Example |
-| ---------- | ------------------------------------------------------- | ------- |
-| env_prefix | indicate your environment like `dev` or `prod` or `uat` | "dev"   |
+| Name              | Description                                             | Example                 |
+| ----------------- | ------------------------------------------------------- | ----------------------- |
+| vpc_cidr_block    | IPv4 VPC CIDR blocks                                    | "10.0.0.0/16"           |
+| subnet_cidr_block | IPv4 subnet CIDR blocks                                 | "10.0.10.0/24"          |
+| avail_zone        | availability zone on AWS                                | "ap-southeast-1a"       |
+| env_prefix        | indicate your environment like `dev` or `prod` or `uat` | "dev"                   |
+| allowed_ip        | allowed ip address range to SSH into your server        | "210.5.168.222/32"      |
+| instance_type     | ec2 instance type                                       | "t2.micro"              |
+| image_id          | image id for creating ec2 instance                      | "ami-0df7a207adb9748c7" |
 
 For example:
 
 your `terraform.tfvars`
 
 ```
+vpc_cidr_block    = "10.0.0.0/16"
+subnet_cidr_block = "10.0.10.0/24"
+avail_zone        = "ap-southeast-1a"
 env_prefix        = "dev"
+allowed_ip        = "210.5.168.222/32"
+instance_type     = "t2.micro"
+image_id          = "ami-0df7a207adb9748c7"
 ```
 
-### 3.2. <a name='Setentryscript'></a>Set entry script
+### 3.3. <a name='Setentryscript'></a>Set entry script
 
-`entry-script.sh` will be run inside the EC2 instance you created.
+You don't need run this script yourself, Terraform will do it for you
+
+`entry-script.sh` will be run inside the EC2 instance you created. (Equivalent to user data section when creating EC2 on AWS console)
 
 You can edit this file to setup the instance at the time it created
 
-### 3.3. <a name='Execution'></a>Execution
+### 3.4. <a name='Execution'></a>Execution
 
 After the above configuration, run
 
@@ -131,7 +127,27 @@ to check if there is any syntax error
 terraform apply -auto-approve
 ```
 
-to actually create EC2 instance and setup vpc
+to actually create EC2 instance and cloudfront
+
+After applying, the SSH key `prod-cathay-key.pem` will be downloaded to your current directory. Remember change the permission first (e.g. `chmod 400 server-key.pem`)
+
+And you may expect the public DNS of EC2 and Cloudfront distribution you created will be displayed like this.
+
+```
+Outputs:
+
+cloudfront_dns = "d1hfveh0xync7k.cloudfront.net"
+ec2_public_dns = "ec2-13-215-183-237.ap-southeast-1.compute.amazonaws.com"
+```
+
+You can check out the full log in `full_log.txt`
+
+Ultimately, this terraform setup will create
+
+- one EC2 instance with allowed port (22, 5001-5003)
+- one Cloudfront distribution with HTTP port 5001
+
+All Cloudfront distributions are pointing to the same EC2 instance
 
 ```bash
 terraform destroy
