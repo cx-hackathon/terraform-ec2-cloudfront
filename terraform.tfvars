@@ -1,1 +1,1 @@
-env_prefix        = "test"
+env_prefix        = "cathay"

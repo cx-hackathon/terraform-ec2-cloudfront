@@ -12,8 +12,8 @@ resource "aws_security_group" "myapp-sg" {
 
   ingress {
     description = "Browser"
-    from_port   = 5001
-    to_port     = 5003
+    from_port   = 8080
+    to_port     = 8081
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -62,7 +62,7 @@ resource "aws_instance" "myapp-server" {
   user_data = file("entry-script.sh")
 
   tags = {
-    Name = "${var.env_prefix}-server"
+    Name = "${var.env_prefix}-api-server"
   }
 }
 
